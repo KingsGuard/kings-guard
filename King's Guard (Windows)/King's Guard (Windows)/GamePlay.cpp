@@ -507,7 +507,7 @@ void Level3() {
 	}
 	system("cls");
 	if (Enemy_Count_Alive < 1) {
-		std::cout << "Congrats! You have defeated the Assasin, your loot: (1) Assasins Blade (30 damage), (2) Healing Potion (heal goes to 150)\n";
+		std::cout << "Congrats! You have defeated the Assasin, your loot: (1) Assasins Blade (30 damage), (2) Healing Potion (health goes to 150)\n";
 		loot_choice = checker(loot_choice);
 		if (loot_choice == 1) {
 			std::cout << "You have chosen the Assasins Blades!\n";
