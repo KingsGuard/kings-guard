@@ -172,48 +172,45 @@ void BattleLoop(Enemy Enemy_Obj_array[]) {
 			std::cout << "(1) To Attack\n";
 			std::cout << "(2) To Heal\n";
 			std::cout << "(3) To Flee\n";
-			std::cout << "(4) To Block\n"; \
-				playerChoice = checker(playerChoice);
+			std::cout << "(4) To Block\n";
+			playerChoice = checker(playerChoice);
+			while (playerChoice > 4 || playerChoice < 1) {
+				std::cout << "This is choice doesn't exist, please pick again.\n";
+				playerChoice = checker(playerChoice);							
+			} 
+			
 			switch (playerChoice) {
 			case 1:
 				std::cout << "What Enemy do you want to attack?\n";
 				while (1)
 				{
 					playerChoice = checker(playerChoice);
-					if (playerChoice > Enemy_Count || playerChoice < 1) {
-						std::cout << "You have tried to attack an enemy that doesn't exist, please try again." << std::endl;
+					if (playerChoice > Enemy_Count || playerChoice < 1 || (Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1) && ((Enemy_Obj_array[playerChoice - 1].Enemy_Name != "DEAD") && (Enemy_Obj_array[playerChoice - 1].Enemy_Name != "FLEED"))) {
+						std::cout << "You have tried to attack an enemy that doesn't exist, is already dead or has fled, please try again." << std::endl;
 					}
 					else {
-						break;
+						Enemy_Obj_array[playerChoice - 1].Enemy_Health -= Info.damage;
+						Enemy_Obj_array[playerChoice - 1].has_been_attacked = true;
+						std::cout << "YOU HAVE ATTACKED\n";
+						Enemy_Count_Alive -= 1;
+						Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
+						Enemy_Obj_array[playerChoice - 1].Enemy_Damage = 0;
+						Enemy_Obj_array[playerChoice - 1].Enemy_Name = "DEAD";
 					}
 				}
-				Enemy_Obj_array[playerChoice - 1].Enemy_Health -= Info.damage;
-				Enemy_Obj_array[playerChoice - 1].has_been_attacked = true;
-				std::cout << "YOU HAVE ATTACKED";
-				if ((Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1) && ((Enemy_Obj_array[playerChoice - 1].Enemy_Name != "DEAD") && (Enemy_Obj_array[playerChoice - 1].Enemy_Name != "FLEED"))) {
-					Enemy_Count_Alive -= 1;
-					Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
-					Enemy_Obj_array[playerChoice - 1].Enemy_Damage = 0;
-					Enemy_Obj_array[playerChoice - 1].Enemy_Name = "DEAD";
-					std::cout << "\n";
-				}
-				else if (Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1) {
-					std::cout << " A DEAD PERSON, WHY?\n";
-					Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
-				}
-				else {
-					std::cout << "\n";
-				}
-				break;
+					
+			break;
 			case 2:
 				if (healthing_cooldown < 1) {
 					Info.health += Info.healing;
 					std::cout << "You have healed " << Info.healing << " Health!\n";
 					healthing_cooldown = 4;
-
 				}
 				else {
-					std::cout << "Sorry, your healing cooldown is active. You have to wait: " << healthing_cooldown << " turns\n";
+					std::cout << "Sorry, your healing cooldown is active. You have to wait: " << healthing_cooldown << " turns. Redo your turn\n";
+					Sleep(4000);
+					turn = "YOUR";
+					redoTurn = true;
 				}
 				break;
 
@@ -223,11 +220,7 @@ void BattleLoop(Enemy Enemy_Obj_array[]) {
 				srand(time(0) + 1);
 				randomNumberFlee = rand() % 10;
 
-				if (Info.playerLevel == 5) {
-					std::cout << "You cannot flee on the final level, " << name << ". Stand, and fight! Even if this is your last battle " << name << ", you can't turn away now!\n";
-					Sleep(5000);
-				}
-				else if (randomNumberFlee > 6) {
+				if (randomNumberFlee > 6) {
 					std::cout << "YOU HAVE FLEED\n";
 					player_fled = true;
 				}
@@ -251,7 +244,10 @@ void BattleLoop(Enemy Enemy_Obj_array[]) {
 				break;
 			}
 		}
-		turn = "ENEMYS";
+		if (!redoTurn) {
+			turn = "ENEMYS";
+		}
+		redoTurn = false;
 	}
 
 	if (turn == "ENEMYS") {
