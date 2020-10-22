@@ -363,3 +363,9 @@ FodyWeavers.xsd
 
 # IExpress files
 .SED
+
+#Icons
+.ico
+
+#Inno Setup Scripts
+.iss
