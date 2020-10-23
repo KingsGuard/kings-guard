@@ -77,15 +77,17 @@ void BattleLoopFinale(Enemy Enemy_Obj_array[]) {
 					else {
 						Enemy_Obj_array[playerChoice - 1].Enemy_Health -= Info.damage;
 						Enemy_Obj_array[playerChoice - 1].has_been_attacked = true;
-						std::cout << "YOU HAVE ATTACKED\n";
-						Enemy_Count_Alive -= 1;
-						Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
-						Enemy_Obj_array[playerChoice - 1].Enemy_Damage = 0;
-						Enemy_Obj_array[playerChoice - 1].Enemy_Name = "DEAD";
+						std::cout << "You have attacked " << Enemy_Obj_array[playerChoice - 1].Enemy_Name << " for " << Info.damage << " damage\n";
+						if (Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1) {
+							Enemy_Count_Alive -= 1;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Damage = 0;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Name = "DEAD";
+						}
+					break;
 					}
 				}
-
-				break;
+			break;
 			case 2:
 				if (healthing_cooldown < 1) {
 					Info.health += Info.healing;
@@ -138,13 +140,12 @@ void BattleLoopFinale(Enemy Enemy_Obj_array[]) {
 
 	if (turn == "ENEMYS") {
 		for (j = 0; j < Enemy_Count; j++) {
-			//Attack
 			if (Enemy_Obj_array[j].Enemy_Name == "FLEED" || Enemy_Obj_array[j].Enemy_Name == "DEAD") {
 				//do nothing, cause they're dead or long gone
 			}
 			else if (!BlockThisTurn && !player_fled) {
 				Info.health -= Enemy_Obj_array[j].Enemy_Damage;
-				std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU\n";
+				std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU FOR " << Enemy_Obj_array[j].Enemy_Damage << " DAMAGE\n";
 			}
 			else if (!player_fled) {
 				std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTEMPTED TO ATTACK YOU, BUT WAS BLOCKED\n";
@@ -206,14 +207,16 @@ void BattleLoop(Enemy Enemy_Obj_array[]) {
 					else {
 						Enemy_Obj_array[playerChoice - 1].Enemy_Health -= Info.damage;
 						Enemy_Obj_array[playerChoice - 1].has_been_attacked = true;
-						std::cout << "YOU HAVE ATTACKED\n";
-						Enemy_Count_Alive -= 1;
-						Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
-						Enemy_Obj_array[playerChoice - 1].Enemy_Damage = 0;
-						Enemy_Obj_array[playerChoice - 1].Enemy_Name = "DEAD";
+						std::cout << "You have attacked " << Enemy_Obj_array[playerChoice - 1].Enemy_Name << " for " << Info.damage << " damage\n";
+						if (Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1) {
+							Enemy_Count_Alive -= 1;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Damage = 0;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Name = "DEAD";
+						}
+						break;
 					}
-				}
-					
+				}					
 			break;
 			case 2:
 				if (healthing_cooldown < 1) {
@@ -311,7 +314,7 @@ void BattleLoop(Enemy Enemy_Obj_array[]) {
 					//Attack
 					if (!BlockThisTurn) {
 						Info.health -= Enemy_Obj_array[j].Enemy_Damage;
-						std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU\n";
+						std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU FOR " << Enemy_Obj_array[j].Enemy_Damage << " DAMAGE\n";
 					}
 					else {
 						std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTEMPTED TO ATTACK YOU, BUT WAS BLOCKED\n";
@@ -322,7 +325,7 @@ void BattleLoop(Enemy Enemy_Obj_array[]) {
 				//Attack
 				if (!BlockThisTurn && !player_fled) {
 					Info.health -= Enemy_Obj_array[j].Enemy_Damage;
-					std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU\n";
+					std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU FOR " << Enemy_Obj_array[j].Enemy_Damage << " DAMAGE\n";
 				}
 				else if (!player_fled) {
 					std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTEMPTED TO ATTACK YOU, BUT WAS BLOCKED\n";
