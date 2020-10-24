@@ -152,7 +152,7 @@ void BattleLoopFinale(Enemy Enemy_Obj_array[]) {
 			}
 		}
 		turn = "YOUR";
-		Sleep(2000);
+		Sleep(4000);
 	}
 }
 
@@ -335,7 +335,7 @@ void BattleLoop(Enemy Enemy_Obj_array[]) {
 
 	}
 	turn = "YOUR";
-	Sleep(2000);
+	Sleep(4000);
 }
 
 
