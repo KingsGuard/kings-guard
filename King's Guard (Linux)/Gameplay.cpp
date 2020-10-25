@@ -1,13 +1,12 @@
 #include <iostream>
 #include <string>
+#include <conio.h>
 #include <ctime>
 #include <math.h>
-#include<limits>
-#include <unistd.h>
 #include <stdlib.h>
-
+#define Sleep(x) usleep((x)*1000) 
+#include <unistd.h>
 #include <stdio.h>
-
 
 #include "Enemy.h"
 #include "Gameplay.h"
@@ -60,32 +59,37 @@ void BattleLoopFinale(Enemy Enemy_Obj_array[]) {
 		else {
 			std::cout << "(1) To Attack\n";
 			std::cout << "(2) To Heal\n";
-			std::cout << "(4) To Block\n"; \
+			std::cout << "(3) To Flee\n";
+			std::cout << "(4) To Block\n";
+			playerChoice = checker(playerChoice);
+			while (playerChoice > 4 || playerChoice < 1) {
+				std::cout << "This is choice doesn't exist, please pick again.\n";
 				playerChoice = checker(playerChoice);
+			}
+
 			switch (playerChoice) {
 			case 1:
 				std::cout << "What Enemy do you want to attack?\n";
 				while (1)
 				{
 					playerChoice = checker(playerChoice);
-					if (playerChoice > Enemy_Count || playerChoice < 1) {
-						std::cout << "You have tried to attack an enemy that doesn't exist, please try again." << std::endl;
-						playerChoice = checker(playerChoice);
+					if (playerChoice > Enemy_Count || playerChoice < 1 || (Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1) && ((Enemy_Obj_array[playerChoice - 1].Enemy_Name != "DEAD") && (Enemy_Obj_array[playerChoice - 1].Enemy_Name != "FLEED"))) {
+						std::cout << "You have tried to attack an enemy that doesn't exist, is already dead or has fled, please try again." << std::endl;
 					}
 					else {
-						break;
+						Enemy_Obj_array[playerChoice - 1].Enemy_Health -= Info.damage;
+						Enemy_Obj_array[playerChoice - 1].has_been_attacked = true;
+						std::cout << "You have attacked " << Enemy_Obj_array[playerChoice - 1].Enemy_Name << " for " << Info.damage << " damage\n";
+						if (Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1) {
+							Enemy_Count_Alive -= 1;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Damage = 0;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Name = "DEAD";
+						}
+					break;
 					}
 				}
-				Enemy_Obj_array[playerChoice - 1].Enemy_Health -= Info.damage;
-				Enemy_Obj_array[playerChoice - 1].has_been_attacked = true;
-				std::cout << "YOU HAVE ATTACKED\n";
-				if (Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1 && (Enemy_Obj_array[playerChoice - 1].Enemy_Name != "DEAD" || Enemy_Obj_array[playerChoice - 1].Enemy_Name != "FLEED")) {
-					Enemy_Count_Alive -= 1;
-					Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
-					Enemy_Obj_array[playerChoice - 1].Enemy_Damage = 0;
-					Enemy_Obj_array[playerChoice - 1].Enemy_Name = "DEAD";
-				}
-				break;
+			break;
 			case 2:
 				if (healthing_cooldown < 1) {
 					Info.health += Info.healing;
@@ -93,16 +97,28 @@ void BattleLoopFinale(Enemy Enemy_Obj_array[]) {
 					healthing_cooldown = 4;
 				}
 				else {
-					std::cout << "Sorry, your healing cooldown is active. You have to wait: " << healthing_cooldown << " turns\n";
+					std::cout << "Sorry, your healing cooldown is active. You have to wait: " << healthing_cooldown << " turns. Redo your turn\n";
+					Sleep(4000);
+					turn = "YOUR";
+					redoTurn = true;
 				}
 				break;
 
 			case 3:
-				std::cout << "Did you not notice that this wasn't an option? You can't flee on the final level! Have a second turn\n";
-				usleep(400000);
-				turn = "YOUR";
-				redoTurn = true;
+				srand(time(0));
+				randomNumberChoice = rand() % 10;
+				srand(time(0) + 1);
+				randomNumberFlee = rand() % 10;
+
+				if (randomNumberFlee > 6) {
+					std::cout << "YOU HAVE FLEED\n";
+					player_fled = true;
+				}
+				else {
+					std::cout << "YOU HAVE ATTEMPTED TO FLEE, IT FAILLED\n";
+				}
 				break;
+
 			case 4:
 				srand(time(0));
 				randomNumberChoice = rand() % 10;
@@ -126,24 +142,23 @@ void BattleLoopFinale(Enemy Enemy_Obj_array[]) {
 
 	if (turn == "ENEMYS") {
 		for (j = 0; j < Enemy_Count; j++) {
-			//Attack
 			if (Enemy_Obj_array[j].Enemy_Name == "FLEED" || Enemy_Obj_array[j].Enemy_Name == "DEAD") {
 				//do nothing, cause they're dead or long gone
 			}
 			else if (!BlockThisTurn && !player_fled) {
 				Info.health -= Enemy_Obj_array[j].Enemy_Damage;
-				std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU\n";
+				std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU FOR " << Enemy_Obj_array[j].Enemy_Damage << " DAMAGE\n";
 			}
 			else if (!player_fled) {
 				std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTEMPTED TO ATTACK YOU, BUT WAS BLOCKED\n";
 			}
 		}
 		turn = "YOUR";
-		usleep(2000000);
+		Sleep(4000);
 	}
 }
 
- void BattleLoop (Enemy Enemy_Obj_array[]) {
+void BattleLoop(Enemy Enemy_Obj_array[]) {
 	system("clear");
 	if (healthing_cooldown < 0) {
 		healthing_cooldown = 0;
@@ -175,84 +190,86 @@ void BattleLoopFinale(Enemy Enemy_Obj_array[]) {
 			std::cout << "(1) To Attack\n";
 			std::cout << "(2) To Heal\n";
 			std::cout << "(3) To Flee\n";
-			std::cout << "(4) To Block\n";\
+			std::cout << "(4) To Block\n";
 			playerChoice = checker(playerChoice);
+			while (playerChoice > 4 || playerChoice < 1) {
+				std::cout << "This is choice doesn't exist, please pick again.\n";
+				playerChoice = checker(playerChoice);							
+			} 
+			
 			switch (playerChoice) {
 			case 1:
 				std::cout << "What Enemy do you want to attack?\n";
 				while (1)
 				{
 					playerChoice = checker(playerChoice);
-					if (playerChoice > Enemy_Count || playerChoice < 1) {
-						std::cout << "You have tried to attack an enemy that doesn't exist, please try again." << std::endl;
+					if (playerChoice > Enemy_Count || playerChoice < 1 || (Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1) && ((Enemy_Obj_array[playerChoice - 1].Enemy_Name != "DEAD") && (Enemy_Obj_array[playerChoice - 1].Enemy_Name != "FLEED"))) {
+						std::cout << "You have tried to attack an enemy that doesn't exist, is already dead or has fled, please try again." << std::endl;
 					}
 					else {
+						Enemy_Obj_array[playerChoice - 1].Enemy_Health -= Info.damage;
+						Enemy_Obj_array[playerChoice - 1].has_been_attacked = true;
+						std::cout << "You have attacked " << Enemy_Obj_array[playerChoice - 1].Enemy_Name << " for " << Info.damage << " damage\n";
+						if (Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1) {
+							Enemy_Count_Alive -= 1;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Damage = 0;
+							Enemy_Obj_array[playerChoice - 1].Enemy_Name = "DEAD";
+						}
 						break;
 					}
-				}
-				Enemy_Obj_array[playerChoice - 1].Enemy_Health -= Info.damage;
-				Enemy_Obj_array[playerChoice - 1].has_been_attacked = true;
-				std::cout << "YOU HAVE ATTACKED";
-				if ( ( Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1 ) && ( ( Enemy_Obj_array[playerChoice-1].Enemy_Name != "DEAD" ) && ( Enemy_Obj_array[playerChoice - 1].Enemy_Name != "FLEED") ) ) {
-					Enemy_Count_Alive -= 1;
-					Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
-					Enemy_Obj_array[playerChoice - 1].Enemy_Damage = 0;
-					Enemy_Obj_array[playerChoice - 1].Enemy_Name = "DEAD";
-					std::cout << "\n";
-				} 
-				else if (Enemy_Obj_array[playerChoice - 1].Enemy_Health < 1) {
-					std::cout << " A DEAD PERSON, WHY?\n";
-					Enemy_Obj_array[playerChoice - 1].Enemy_Health = 0;
-				}
-				else {
-					std::cout << "\n";
-				}
+				}					
 			break;
 			case 2:
 				if (healthing_cooldown < 1) {
 					Info.health += Info.healing;
 					std::cout << "You have healed " << Info.healing << " Health!\n";
 					healthing_cooldown = 4;
-
-				} else {
-					std::cout << "Sorry, your healing cooldown is active. You have to wait: " << healthing_cooldown << " turns\n";
+				}
+				else {
+					std::cout << "Sorry, your healing cooldown is active. You have to wait: " << healthing_cooldown << " turns. Redo your turn\n";
+					Sleep(4000);
+					turn = "YOUR";
+					redoTurn = true;
 				}
 				break;
-				
+
 			case 3:
 				srand(time(0));
 				randomNumberChoice = rand() % 10;
 				srand(time(0) + 1);
 				randomNumberFlee = rand() % 10;
 
-				if (Info.playerLevel == 5) {
-					std::cout << "You cannot flee on the final level, " << name << ". Stand, and fight! Even if this is your last battle "<< name << ", you can't turn away now!\n";
-					usleep(500000);
+				if (randomNumberFlee > 6) {
+					std::cout << "YOU HAVE FLEED\n";
+					player_fled = true;
 				}
-				else if (randomNumberFlee > 6) {
-							std::cout << "YOU HAVE FLEED\n";
-							player_fled = true;
-				} else {
-					std::cout << "YOU HAVE ATTEMPTED TO FLEE, IT FAILLED\n"; }
-			break;
+				else {
+					std::cout << "YOU HAVE ATTEMPTED TO FLEE, IT FAILLED\n";
+				}
+				break;
 
 			case 4:
 				srand(time(0));
 				randomNumberChoice = rand() % 10;
 				srand(time(0) + 1);
 				randomNumberFlee = rand() % 10;
-					if (randomNumberChoice > 2) {
-							std::cout << "YOU HAVE BLOCKED THE NEXT ATTACK\n";
-							BlockThisTurn = true;
-					} else {
-						std::cout << "YOU HAVE ATTEMPTED TO BLOCK, IT FAILLED\n"; 
-					}
-					break;
+				if (randomNumberChoice > 2) {
+					std::cout << "YOU HAVE BLOCKED THE NEXT ATTACK\n";
+					BlockThisTurn = true;
+				}
+				else {
+					std::cout << "YOU HAVE ATTEMPTED TO BLOCK, IT FAILLED\n";
+				}
+				break;
 			}
 		}
-		turn = "ENEMYS";
-	} 
-	
+		if (!redoTurn) {
+			turn = "ENEMYS";
+		}
+		redoTurn = false;
+	}
+
 	if (turn == "ENEMYS") {
 		srand(time(0));
 		randomNumberChoice = rand() % 10;
@@ -299,18 +316,18 @@ void BattleLoopFinale(Enemy Enemy_Obj_array[]) {
 					//Attack
 					if (!BlockThisTurn) {
 						Info.health -= Enemy_Obj_array[j].Enemy_Damage;
-						std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU\n";
+						std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU FOR " << Enemy_Obj_array[j].Enemy_Damage << " DAMAGE\n";
 					}
 					else {
 						std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTEMPTED TO ATTACK YOU, BUT WAS BLOCKED\n";
 					}
-				}	
+				}
 			}
 			else {
 				//Attack
 				if (!BlockThisTurn && !player_fled) {
 					Info.health -= Enemy_Obj_array[j].Enemy_Damage;
-					std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU\n";
+					std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTACKED YOU FOR " << Enemy_Obj_array[j].Enemy_Damage << " DAMAGE\n";
 				}
 				else if (!player_fled) {
 					std::cout << Enemy_Obj_array[j].Enemy_Name << " HAS ATTEMPTED TO ATTACK YOU, BUT WAS BLOCKED\n";
@@ -320,13 +337,13 @@ void BattleLoopFinale(Enemy Enemy_Obj_array[]) {
 
 	}
 	turn = "YOUR";
-	usleep(2000000);
-} 
+	Sleep(4000);
+}
 
 
 void Level1() {
 	player_fled = false;
-	usleep(10000);
+	Sleep(100);
 	std::cout << "\n\n=================================== LEVEL 1 ===================================\n\n";
 	std::cout << "You begin your journey to destroy the assasins, by walking into the great forest. \n";
 	std::cout << "You begin to walk, and notice a few broken branches and twigs, and begin to pick up a trail. \n";
@@ -349,7 +366,7 @@ void Level1() {
 	Bear2.Enemy_Health = 30;
 	Bear2.Enemy_Damage = 6;
 	Bear2.Enemy_Name = "Bear 2";
-	Enemy Level1Bears[2] = {Bear1, Bear2};
+	Enemy Level1Bears[2] = { Bear1, Bear2 };
 
 	while (Enemy_Count_Alive > 0 && !player_fled && !player_failed) {
 		BattleLoop(Level1Bears);
@@ -364,7 +381,8 @@ void Level1() {
 			Info.damage = 13;
 			std::cout << "===== ( Press any key to continue ) =====\n";
 			getchar();
-		} else if (loot_choice == 2){
+		}
+		else if (loot_choice == 2) {
 			std::cout << "You have chosen the bear fat!\n";
 			Info.healing = 17;
 			std::cout << "===== ( Press any key to continue ) =====\n";
@@ -378,16 +396,18 @@ void Level1() {
 
 		Info.playerLevel++;
 
-	} else if (player_fled) {
+	}
+	else if (player_fled) {
 		std::cout << "You have taken the cowardly way out, but maybe a smarter move than staying. Bears aren't afraid of tearing you apart!\n";
 		std::cout << "===== ( Press any key to continue ) =====\n";
 		getchar();
 		Info.playerLevel++;
 
-	} else {
+	}
+	else {
 		system("clear");
 		std::cout << "You have died, and failed your mission.\n";
-		usleep(1000000);
+		Sleep(5000);
 		deadLol = true;
 		player_failed = true;
 	}
@@ -395,7 +415,7 @@ void Level1() {
 
 void Level2() {
 	player_fled = false;
-	usleep(1000000);
+	Sleep(100);
 	std::cout << "\n\n=================================== LEVEL 2 ===================================\n\n";
 	std::cout << "After the bear encounter, you hurry on, you don't have much time to find the assasins.\n";
 	std::cout << "You begin to start getting lost, you've lost the assasin's trail a long time ago. \n";
@@ -423,7 +443,7 @@ void Level2() {
 	SwampMonster3.Enemy_Health = 5;
 	SwampMonster3.Enemy_Damage = 6;
 	SwampMonster3.Enemy_Name = "Baby Swamp Monster";
-	Enemy SwampMonsters[3] = {SwampMonster1, SwampMonster2, SwampMonster3};
+	Enemy SwampMonsters[3] = { SwampMonster1, SwampMonster2, SwampMonster3 };
 
 	player_fled = false;
 	player_failed = false;
@@ -441,7 +461,8 @@ void Level2() {
 			Info.damage = 18;
 			std::cout << "===== ( Press any key to continue ) =====\n";
 			getchar();
-		} else if (loot_choice == 2){
+		}
+		else if (loot_choice == 2) {
 			std::cout << "You have chosen the Swampy Potion!\n";
 			Info.healing = 19;
 			std::cout << "===== ( Press any key to continue ) =====\n";
@@ -455,15 +476,17 @@ void Level2() {
 
 		Info.playerLevel++;
 
-	} else if (player_fled) {
+	}
+	else if (player_fled) {
 		std::cout << "You have taken the cowardly way out, but maybe a smarter move than staying, those swamp monsters where scary!\n";
 		Info.playerLevel++;
 		std::cout << "===== ( Press any key to continue ) =====\n";
 		getchar();
-	} else {
+	}
+	else {
 		system("clear");
 		std::cout << "You have died, and failed your mission.\n";
-		usleep(5000000);
+		Sleep(5000);
 		deadLol = true;
 		player_failed = true;
 	}
@@ -471,7 +494,7 @@ void Level2() {
 
 void Level3() {
 	player_fled = false;
-	usleep(100000);
+	Sleep(100);
 	std::cout << "\n\n=================================== LEVEL 3 ===================================\n\n";
 	std::cout << "Your feet plastered with a thick layer of muddy goo, you continue on in your journey. \n";
 	std::cout << "You pass a small windmill, and spot some blood coated on the door, it looks like there was a fight. \n";
@@ -492,7 +515,7 @@ void Level3() {
 	AssasinScout.Enemy_Health = 70;
 	AssasinScout.Enemy_Damage = 15;
 	AssasinScout.Enemy_Name = "Assasin Scout";
-	Enemy Level3AssasinScout[1] = {AssasinScout};
+	Enemy Level3AssasinScout[1] = { AssasinScout };
 
 	while (Enemy_Count_Alive > 0 && !player_fled && !player_failed) {
 		BattleLoop(Level3AssasinScout);
@@ -500,14 +523,15 @@ void Level3() {
 	}
 	system("clear");
 	if (Enemy_Count_Alive < 1) {
-		std::cout << "Congrats! You have defeated the Assasin, your loot: (1) Assasins Blade (30 damage), (2) Healing Potion (heal goes to 150)\n";
+		std::cout << "Congrats! You have defeated the Assasin, your loot: (1) Assasins Blade (30 damage), (2) Healing Potion (health goes to 150)\n";
 		loot_choice = checker(loot_choice);
 		if (loot_choice == 1) {
 			std::cout << "You have chosen the Assasins Blades!\n";
 			Info.damage = 30;
 			std::cout << "===== ( Press any key to continue ) =====\n";
 			getchar();
-		} else if (loot_choice == 2){
+		}
+		else if (loot_choice == 2) {
 			std::cout << "You have chosen the Healing Potion !\n";
 			Info.health = 150;
 			std::cout << "===== ( Press any key to continue ) =====\n";
@@ -521,15 +545,17 @@ void Level3() {
 
 		Info.playerLevel++;
 
-	} else if (player_fled) {
+	}
+	else if (player_fled) {
 		std::cout << "You have taken the cowardly way out, but maybe a smarter move than staying. Assasins are a deadly threat\n";
 		Info.playerLevel++;
 		std::cout << "===== ( Press any key to continue ) =====\n";
 		getchar();
-	} else {
+	}
+	else {
 		system("clear");
 		std::cout << "You have died, and failed your mission.\n";
-		usleep(5000);
+		Sleep(5000);
 		deadLol = true;
 		player_failed = true;
 	}
@@ -537,7 +563,7 @@ void Level3() {
 
 void Level4() {
 	player_fled = false;
-	usleep(100000);
+	Sleep(100);
 	std::cout << "\n\n=================================== LEVEL 4 ===================================\n\n";
 	std::cout << "After the battle with the assasins, you noticed that they released a hawk, carrying a message.\n";
 	std::cout << "You follow the path of the hawk, and notice it turning slightly west, but still heading north.\n";
@@ -561,28 +587,28 @@ void Level4() {
 	magmaMinion1.Enemy_Health = 10;
 	magmaMinion1.Enemy_Damage = 2;
 	magmaMinion1.Enemy_Name = "Rock Minion 1";
-		Enemy magmaMinion2;
+	Enemy magmaMinion2;
 	magmaMinion2.has_been_attacked = false;
 	magmaMinion2.Enemy_Health = 10;
 	magmaMinion2.Enemy_Damage = 3;
 	magmaMinion2.Enemy_Name = "Rock Minion 2";
-		Enemy magmaMinion3;
+	Enemy magmaMinion3;
 	magmaMinion3.has_been_attacked = false;
 	magmaMinion3.Enemy_Health = 10;
 	magmaMinion3.Enemy_Damage = 4;
 	magmaMinion3.Enemy_Name = "Rock Minion 3";
-		Enemy magmaMinion4;
+	Enemy magmaMinion4;
 	magmaMinion4.has_been_attacked = false;
 	magmaMinion4.Enemy_Health = 10;
 	magmaMinion4.Enemy_Damage = 5;
 	magmaMinion4.Enemy_Name = "Rock Minion 4";
-		Enemy magmaMinion5;
+	Enemy magmaMinion5;
 	magmaMinion5.has_been_attacked = false;
 	magmaMinion5.Enemy_Health = 10;
 	magmaMinion5.Enemy_Damage = 5;
 	magmaMinion5.Enemy_Name = "Rock Minion 5";
-	
-	Enemy MagmaMonsters[6] = {Magmatitan, magmaMinion1, magmaMinion2, magmaMinion3, magmaMinion4, magmaMinion5};
+
+	Enemy MagmaMonsters[6] = { Magmatitan, magmaMinion1, magmaMinion2, magmaMinion3, magmaMinion4, magmaMinion5 };
 
 	while (Enemy_Count_Alive > 0 && !player_fled && !player_failed) {
 		BattleLoop(MagmaMonsters);
@@ -597,7 +623,8 @@ void Level4() {
 			Info.damage = 40;
 			std::cout << "===== ( Press any key to continue ) =====\n";
 			getchar();
-		} else if (loot_choice == 2){
+		}
+		else if (loot_choice == 2) {
 			std::cout << "You have chosen the Rock Giant Heart!\n";
 			Info.healing = 40;
 			std::cout << "===== ( Press any key to continue ) =====\n";
@@ -611,15 +638,17 @@ void Level4() {
 
 		Info.playerLevel++;
 
-	} else if (player_fled) {
+	}
+	else if (player_fled) {
 		std::cout << "You have taken the cowardly way out, but maybe a smarter move than staying. Rock Giants will crush you if you're not carefull! \n";
 		Info.playerLevel++;
 		std::cout << "===== ( Press any key to continue ) =====\n";
 		getchar();
-	} else {
+	}
+	else {
 		system("clear");
 		std::cout << "You have died, and failed your mission.\n";
-		usleep(5000);
+		Sleep(5000);
 		deadLol = true;
 		player_failed = true;
 	}
@@ -629,7 +658,7 @@ void Level4() {
 
 void Level5() {
 	player_fled = false;
-	usleep(100000);
+	Sleep(100);
 	std::cout << "\n\n=================================== LEVEL 5 ===================================\n\n";
 	std::cout << "Your clothes are scarred, and your armour sooty, that fight with the Rock Giant was tough.\n";
 	std::cout << "You barely got out of there alive, and you must now find and destroy the assasins camp. \n";
@@ -674,7 +703,7 @@ void Level5() {
 	Andromeda.Enemy_Health = 50;
 	Andromeda.Enemy_Damage = 5;
 	Andromeda.Enemy_Name = "Assasin Fighter 5";
-	Enemy Level5Assasin[5] = {Runnan, Rayla, Ram, Skor, Andromeda};
+	Enemy Level5Assasin[5] = { Runnan, Rayla, Ram, Skor, Andromeda };
 
 	// RIP Callisto, they never returned from their scouting mission
 
@@ -691,14 +720,16 @@ void Level5() {
 		std::cout << "===== ( Press any key to end ) =====\n";
 		getchar();
 		WinLol = true;
-	} else if (player_fled) {
+	}
+	else if (player_fled) {
 		std::cout << "Why are you looking at the source code? Actually, why did I put this in a cout statement, there's no way that you could ever get here unless theres a bug!\n";
 		// std::cout << "You have taken the cowardly way out, but maybe a smarter move than staying. Assasins are a deadly threat.\n";
-		usleep(1000000);
-	} else {
+		Sleep(10000);
+	}
+	else {
 		system("clear");
 		std::cout << "You have died, and failed your mission.\n";
-		usleep(5000000);
+		Sleep(5000);
 		deadLol = true;
 		player_failed = true;
 	}

@@ -1,11 +1,12 @@
 ﻿#include <iostream>
 #include <string>
+#include <conio.h>
 #include <ctime>
 #include <math.h>
-#include <limits.h>
-#include <unistd.h>
 #include <stdlib.h>
-
+#define Sleep(x) usleep((x)*1000) 
+#include <unistd.h>
+#include <stdio.h>
 
 #include "Enemy.h"
 #include "Gameplay.h"
@@ -52,7 +53,7 @@ int checker(int a) {
 }
 
 int main() {
-	
+
 	start();
 
 	bool stopper = false;
@@ -68,7 +69,7 @@ int main() {
 	//std::cout <<  "  ███   ▀█▀ █▀    ▀█   █▀    ████████▀      ▄████████▀         ████████▀  ████████▀    ███    █▀    ███    ███ ████████▀    \n";
 	//std::cout <<  "  ▀                                                                                                 ███    ███              \n";
 	std::cout << "\n===========PLEASE ENTER ADVENTURER'S NAME===========\n";
-	while(!stopper) {
+	while (!stopper) {
 		std::cin >> name;
 		//Checking if name is correct
 		std::cout << "\n====DO YOU ACCEPT THIS NAME: '" << name << "' (1) FOR YES, (0) FOR NO ===\n";
@@ -76,7 +77,7 @@ int main() {
 		if (!stopper) {
 			// Name is incorrect, restart
 			std::cout << "\n===========PLEASE ENTER ADVENTURER'S NAME (ONE WORD) ===========\n";
-		} 
+		}
 		else if (stopper) {
 			// Name is correct, continue
 			continue;
@@ -103,7 +104,7 @@ int main() {
 			}
 		}
 	}
-		
+
 	// Begin Tutorial
 	std::cout << "\n==== DO YOU WANT TO START THE TUTORIAL? (1) FOR YES, (0) FOR NO  ==== \n";
 	stopper = checkerBool(stopper);
@@ -124,12 +125,12 @@ int main() {
 	system("clear");
 
 
-	while ( (!deadLol) && (!WinLol) && (!QuitLol) ) {
-	GameLoopFunction();
+	while ((!deadLol) && (!WinLol) && (!QuitLol)) {
+		GameLoopFunction();
 	}
 
 	std::cout << "\n ========== That was the tale of " << name << ". The End ========== \n\n";
-	usleep(5000000);
+	Sleep(5000);
 	return 0;
 }
 

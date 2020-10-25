@@ -1,11 +1,12 @@
 #include <iostream>
 #include <string>
+#include <conio.h>
 #include <ctime>
 #include <math.h>
-#include <limits>
-#include <unistd.h>
 #include <stdlib.h>
-
+#define Sleep(x) usleep((x)*1000) 
+#include <unistd.h>
+#include <stdio.h>
 
 #include "Enemy.h"
 #include "Gameplay.h"
@@ -45,7 +46,7 @@ void tutorial() {
 	system("clear");
 	std::cout << "\nThis is the combat scene, and we have pitted you against your worst enemy... Training dummy!\n";
 	std::cout << "We will go down the list, starting with attack. To trigger attack, you must enter the key '1'.\n";
-	std::cout << "If you put in any input other than 1-4, your attack will be forfeit, so be carefull.\n";
+	std::cout << "If you put in any input other than 1-4, you will have to choose again.\n";
 	std::cout << "Then you will have to put in what enemy you want to attack, after this message pops up:\n";
 	std::cout << "'What Enemy do you want to attack?'\n";
 	std::cout << "You cannot put in anything but a number, and this number has to have a correlating enemy.\n";
